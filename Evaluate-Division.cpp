@@ -1,33 +1,34 @@
 class Solution {
+private:
+    unordered_map<string, vector<pair<string, double>>> m;
 public:
-    double dfs(unordered_map<string, vector<pair<string, double>>>& m, string src, string des) {
+    double dfs(const string& src, const string& des) {
         if(m[src].empty() || m[des].empty()) {return -1;}
-        deque<pair<string, double>> d{{src, 1.0}}; // stack
-        unordered_map<string, bool> visited{};
-    
-        while(!d.empty()) {
-            pair<string, double> t = d.back();
-            d.pop_back();
-            if(t.first == des) {return t.second;}
-            visited[t.first] = true;
-            for(const auto& [v, e] : m[t.first]) {
-                if(visited[v]) {continue;}
-                d.push_back({v, t.second * e});
+        stack<pair<string, double>> s;
+        s.push({src, 1.0});
+        unordered_map<string, bool> visited;
+        while(!s.empty()) {
+            pair<string, double> temp = s.top();
+            s.pop();
+            visited[temp.first] = true;
+            if(temp.first == des) {return temp.second;}
+            for(auto const& v : m[temp.first]) {
+                if(visited[v.first]) {continue;}
+                s.push({v.first, temp.second * v.second});
             }
         }
         return -1;
     }
 
     vector<double> calcEquation(vector<vector<string>>& equations, vector<double>& values, vector<vector<string>>& queries) {
-        unordered_map<string, vector<pair<string, double>>> m;
         for(int i = 0; i < equations.size(); ++i) {
             m[equations[i][0]].push_back({equations[i][1], values[i]});
-            m[equations[i][1]].push_back({equations[i][0], 1 / values[i]}); 
+            m[equations[i][1]].push_back({equations[i][0], 1 / values[i]});
         }
 
         vector<double> out;
         for(auto const& q : queries) {
-            out.push_back(dfs(m, q[0], q[1]));
+            out.push_back(dfs(q[0], q[1]));
         }
         return out;
     }
